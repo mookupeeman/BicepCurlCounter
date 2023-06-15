@@ -7,8 +7,6 @@ import cv2
 counter=0
 stage=None
 
-status=None
-
 
 
 
@@ -36,7 +34,31 @@ def calculateangle(a,b,c):
     return angle
 
     
-def curlcounter():
+
+
+
+cap=cv2.VideoCapture(0);
+
+
+with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+
+
+
+        img= cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        
+
+        img.flags.writeable=False
+
+        result = pose.process(img)
+
+        try:
+            landmarks=result.pose_landmarks.landmark
+
+
             sh=[landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
             elb=[landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x,landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
             lwrist=[landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
@@ -62,114 +84,6 @@ def curlcounter():
                 stage='up'
                 counter=counter+1
                 print(counter)
-
-def squatcounter():
-        lankle=[landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value].x,landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value].y]
-        lhip=[landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
-        lknee=[landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].x,landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].y]
-        lsh=[landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
-        #ltoe=[landmarks[mp_pose.PoseLandmark.LEFT_TOE.value].x,landmarks[mp_pose.PoseLandmark.LEFT_TOE.value].y]
-
-        lhipvertical=[landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,0]
-        lkneevertical=[landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value].x,0]
-        
-        lanklevertical=[landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value].x,0]
-
-        angle1=calculateangle(lsh,lhip,lhipvertical)
-
-        angle2=calculateangle(lhip,lknee,lkneevertical)
-
-        angle3-calculateangle(lknee,lankle,lanklevertical)
-
-        
-        
-
-        if angle1<18:
-            #status='Bend Forward'
-
-            cv2.rectangle(img,(0,0),(255,80),(255,255,0),-1)
-
-            
-
-            cv2.putText(img,'bend Forward',(15,60),cv2.FONT_HERSHEY_SIMPLEX,0.5,(255,0,255),2,cv2.LINE_AA)
-        if angle1>45:
-            cv2.rectangle(img,(0,0),(255,80),(255,255,0),-1)
-
-            #cv2.putText(img,'REPS',(20,20),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,0,0),2,cv2.LINE_AA)
-
-            cv2.putText(img,'Bend Backward',(15,60),cv2.FONT_HERSHEY_SIMPLEX,0.5,(255,0,255),2,cv2.LINE_AA)
-
-        
-            
-
-        if angle2>=32:
-            stage='transition'
-        if angle2>50 and angle2<80 and stage='transition':
-            cv2.rectangle(img,(0,0),(255,80),(255,255,0),-1)
-
-            #cv2.putText(img,'REPS',(20,20),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,0,0),2,cv2.LINE_AA)
-
-            cv2.putText(img,'Lower your hips',(15,60),cv2.FONT_HERSHEY_SIMPLEX,0.5,(255,0,255),2,cv2.LINE_AA)
-
-            stage='transition2'
-
-        if angle>80 and angle<92 and stage='transition2':
-            if angle3<30:
-                stage='down'
-                counter+=1
-                print(counter)
-            if angle3>30:
-
-                cv2.rectangle(img,(0,0),(255,80),(255,255,0),-1)
-
-                #cv2.putText(img,'REPS',(20,20),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,0,0),2,cv2.LINE_AA)
-
-                cv2.putText(img,'Knee falling over toe',(15,60),cv2.FONT_HERSHEY_SIMPLEX,0.5,(255,0,255),2,cv2.LINE_AA)
-                
-            
-        if angle>95 and stage='down':
-            cv2.rectangle(img,(0,0),(255,80),(255,255,0),-1)
-
-            #cv2.putText(img,'REPS',(20,20),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,0,0),2,cv2.LINE_AA)
-
-            cv2.putText(img,'Too much bend',(15,60),cv2.FONT_HERSHEY_SIMPLEX,0.5,(255,0,255),2,cv2.LINE_AA)
-
-            stage=None
-            counter-=1
-
-
-
-
-
-cap=cv2.VideoCapture(0);
-
-
-with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
-
-    while cap.isOpened():
-        print("Enter your choice of excercise: 1= Bicep Curl counter, 2= Squat counter, 3=Chest Flies counter")
-        print('\n')
-
-        choice=int(input("Enter the choice: "))
-        ret, frame = cap.read()
-
-
-
-        img= cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-        
-
-        img.flags.writeable=False
-
-        result = pose.process(img)
-
-        try:
-            if(choice=1):
-                curlcounter()
-            elif(choice=2):
-                squatcounter()
-            #elif(choice==3):
-                #chestfliescounter()
             
         except:
             pass
@@ -200,3 +114,8 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
 
     cap.release()
     cv2.destroyAllWindows()
+
+
+
+
+        
